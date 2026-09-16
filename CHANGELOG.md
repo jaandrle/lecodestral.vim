@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## v1.2.0
+
+### ✨ Added
+
+- **Buffer-level toggle** — enable/disable suggestions per buffer with `:LeCodestralToggleBuffer` / `lecodestral#toggle_buffer()` (`b:lecodestral_enabled`).
+- **Automatic disabling for special buffers** — suggestions are skipped in `help`, `prompt`, `quickfix`, `terminal` and `nofile` buffers.
+- **`g:lecodestral_disabled_filetypes`** — disable suggestions for specific filetypes.
+- **`:LeCodestralStatus` / `lecodestral#status()`** — show why suggestions are disabled (or that they're enabled) via a popup.
+
+### 🔧 Changed
+
+- **Centralized enable checks** — global toggle, buffer toggle, buftype and filetype rules are now evaluated in `s:disabled_reason()` / `s:is_enabled()` and honored by every entry point.
+- **Word context extraction** — `lecodestral#cycle()` now trims leading non-word characters; the 'word' context always matches just the first keyword (e.g. `(foo` → `foo`).
+- **Indentation** — switched to tabs across the codebase.
+
 ## v1.1.0
 
 ### ⚠️ Breaking Changes

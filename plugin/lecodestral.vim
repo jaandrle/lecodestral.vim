@@ -2,7 +2,7 @@ if exists('g:loaded_lecodestral')
 	finish
 endif
 let g:loaded_lecodestral = 1
-let g:lecodestral#version = '1.1.0'
+let g:lecodestral#version = '1.2.0'
 
 if !has('patch-9.0.0067') || !has('textprop') || !has('job')
 	echohl WarningMsg
@@ -35,6 +35,7 @@ inoremap <silent> <Plug>(lecodestral-cycle-context) <cmd>call lecodestral#cycle_
 command! LeCodestralToggle call lecodestral#toggle()
 command! LeCodestralToggleBuffer call lecodestral#toggle_buffer()
 command! LeCodestralDismiss call lecodestral#dismiss()
+command! LeCodestralStatus call lecodestral#status()
 
 let s:dir = expand('<sfile>:h:h')
 if getftime(s:dir . '/doc/lecodestral.txt') > getftime(s:dir . '/doc/tags')

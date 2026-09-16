@@ -48,6 +48,7 @@ let s:req_buf = 0
 let s:warned_key = 0
 let s:context_options = ['preview', 'full', 'line', 'word']
 let s:context = 'preview'
+let s:statusline_active = 0
 
 function! s:disabled_reason() abort
 	if !s:enabled_global
@@ -70,11 +71,45 @@ function! s:is_enabled() abort
 	return empty(s:disabled_reason())
 endfunction
 
+function! lecodestral#statusline() abort
+	let s:statusline_active = 1
+	let l:reason = s:disabled_reason()
+	if !empty(l:reason)
+		return 'OFF'
+	endif
+	if mode() !~# '^[iRc]'
+		return ' ON'
+	endif
+	if type(s:cur_job) == v:t_job && job_status(s:cur_job) ==# 'run'
+		return ' * '
+	endif
+	if !empty(s:ghost_choices)
+		return printf('%d/%d', s:ghost_idx + 1, len(s:ghost_choices))
+	endif
+	return ' 0 '
+endfunction
+
+function! s:redraw_statusline() abort
+	if s:statusline_active
+		redrawstatus
+	endif
+endfunction
+
+function! lecodestral#status() abort
+	let l:reason = s:disabled_reason()
+	if !empty(l:reason)
+		call s:notify('Disabled: ' . l:reason)
+	else
+		call s:notify('Enabled (' . (type(s:cur_job) == v:t_job && job_status(s:cur_job) ==# 'run' ? 'request in flight' : 'idle') . ')')
+	endif
+endfunction
+
 function! s:clear_ghost() abort
 	if s:ghost_active
 		silent! call prop_remove({'type': 'lecodestral_ghost', 'all': v:true}, 1, line('$'))
 		let s:ghost_lines = []
 		let s:ghost_active = 0
+		call s:redraw_statusline()
 	endif
 endfunction
 
@@ -96,6 +131,7 @@ function! s:render_ghost(lines) abort
 	endfor
 	let s:ghost_lines = a:lines
 	let s:ghost_active = 1
+	call s:redraw_statusline()
 endfunction
 
 " Checks whether the text the user just typed (since the anchor col/lnum of
@@ -210,6 +246,7 @@ function! s:on_err(gen, ch, msg) abort
 endfunction
 
 function! s:finish(gen, ch) abort
+	call s:redraw_statusline()
 	let s:ghost_choices = []
 	let s:ghost_idx = 0
 	if a:gen != s:gen
@@ -350,6 +387,7 @@ function! s:trigger(...) abort
 				\ 'err_cb': function('s:on_err', [l:gen]),
 				\ 'close_cb': function('s:finish', [l:gen]),
 				\ })
+	call s:redraw_statusline()
 endfunction
 
 function! lecodestral#on_change() abort
@@ -388,6 +426,7 @@ function! lecodestral#toggle() abort
 		call s:clear_ghost()
 	endif
 	call s:notify(s:enabled_global ? 'Enabled' : 'Disabled')
+	call s:redraw_statusline()
 endfunction
 function! lecodestral#toggle_buffer() abort
 	let b:lecodestral_enabled = !get(b:, 'lecodestral_enabled', 1)
@@ -395,6 +434,7 @@ function! lecodestral#toggle_buffer() abort
 		call s:clear_ghost()
 	endif
 	call s:notify('Buffer ' . (b:lecodestral_enabled ? 'enabled' : 'disabled'))
+	call s:redraw_statusline()
 endfunction
 
 function! lecodestral#accept() abort

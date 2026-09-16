@@ -96,6 +96,22 @@ imap <S-Space> <Plug>(lecodestral-complete>
 
 - `:LeCodestralToggle`: Toggle plugin on/off
 - `:LeCodestralDismiss`: Dismiss current suggestion
+- `:LeCodestralStatus`: Show why the plugin is disabled (or that it's enabled)
+
+### Statusline
+
+You can show the plugin state in your statusline by adding `%{lecodestral#statusline()}` to `&statusline`, e.g.:
+
+```vim
+set statusline+=%{lecodestral#statusline()}
+```
+
+It returns:
+- `OFF` — disabled (globally, per-buffer, or for the current filetype)
+- ` ON` — enabled outside insert mode
+- ` * ` — a request is in flight
+- `N/M` — suggestion `N` of `M` while cycling
+- ` 0 ` — enabled and idle
 
 ### Functions
 
@@ -106,6 +122,8 @@ imap <S-Space> <Plug>(lecodestral-complete>
 - `lecodestral#complete()`: Trigger a new completion request.
 - `lecodestral#cycle({offset})`: Cycle through available suggestions. Use positive offset to go forward, negative to go backward. 
 - `lecodestral#cycle_context()`: Cycle through context options: preview (shows first N lines based on `g:lecodestral_max_lines`), full (shows entire suggestion), line (shows first line only), word (shows first word only).
+- `lecodestral#statusline()`: Returns the plugin state string for use in `&statusline` (see [Statusline](#statusline)).
+- `lecodestral#status()`: Display why the plugin is disabled, or that it's enabled. Same as `:LeCodestralStatus`.
 - <small>`lecodestral#on_change()`: Internal function called on cursor movement</small>
 
 ## Configuration

@@ -62,6 +62,10 @@ is visible, <Tab> behaves normally (real tab, or popup-menu navigation).
                                                              *:LeCodestralDismiss*
 :LeCodestralDismiss     Clear the currently displayed suggestion.
 
+                                                               *:LeCodestralStatus*
+:LeCodestralStatus      Show why suggestions are disabled (or that they're
+                        enabled) via a popup.
+
 ==============================================================================
 6. MAPPINGS                                              *lecodestral-mappings*
 
@@ -130,6 +134,18 @@ lecodestral#cycle({offset})
 <
                                                     *lecodestral#cycle_context()*
 lecodestral#cycle_context()     Cycle through context options: preview (shows first N lines), full (shows entire suggestion), line (shows first line only), word (shows first word only).
+
+*lecodestral#statusline()*
+lecodestral#statusline()    Return a short status string for use in &statusline.
+                        Add it to your statusline with: >
+                            set statusline+=%{lecodestral#statusline()}
+<                       It returns "OFF" when disabled, " ON" outside insert
+                        mode, " * " while a request is in flight, "N/M" while
+                        cycling through suggestions, and " 0 " otherwise.
+
+*lecodestral#status()*
+lecodestral#status()    Show why suggestions are disabled (or that they're
+                        enabled) via a popup. Same as :LeCodestralStatus.
 
 ==============================================================================
 7. CONFIGURATION                                            *lecodestral-config*
