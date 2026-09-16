@@ -225,14 +225,7 @@ function! lecodestral#cycle(offset) abort
 		let l:lines = l:lines[0 : min([l:maxl, l:lines->len()]) - 1]
 	endif
 	if s:context ==# 'word'
-		let l:line = l:lines[0]
-		let l:end = l:line->len()
-		let l:match = l:line->match('\w')
-		if l:match == 0
-				let l:end = l:line->match('\W')
-		elseif l:match > 0
-				let l:end = l:line->match('\W', l:match)
-		endif
+		let l:end = l:lines[0]->matchend('\%(\k\@!.\)*\k*')
 		let l:lines = [l:lines[0]->strpart(0, l:end)]
 	endif
 	call s:render_ghost(l:lines)

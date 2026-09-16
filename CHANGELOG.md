@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 - **Buffer-level toggle** — enable/disable suggestions per buffer with `:LeCodestralToggleBuffer` / `lecodestral#toggle_buffer()` (`b:lecodestral_enabled`).
 - **Automatic disabling for special buffers** — suggestions are skipped in `help`, `prompt`, `quickfix`, `terminal` and `nofile` buffers.
 - **`g:lecodestral_disabled_filetypes`** — disable suggestions for specific filetypes.
+- **Statusline support** — add `%{lecodestral#statusline()}` to `&statusline` to show the plugin state (`OFF`, ` ON`, ` * `, `N/M`, ` 0 `). The statusline auto-refreshes via `redrawstatus()` whenever the state changes.
 - **`:LeCodestralStatus` / `lecodestral#status()`** — show why suggestions are disabled (or that they're enabled) via a popup.
 
 ### 🔧 Changed
