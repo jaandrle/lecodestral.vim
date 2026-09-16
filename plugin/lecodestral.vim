@@ -33,6 +33,7 @@ inoremap <silent> <Plug>(lecodestral-cycle-suggestions-prev) <cmd>call lecodestr
 inoremap <silent> <Plug>(lecodestral-cycle-context) <cmd>call lecodestral#cycle_context()<cr>
 
 command! LeCodestralToggle call lecodestral#toggle()
+command! LeCodestralToggleBuffer call lecodestral#toggle_buffer()
 command! LeCodestralDismiss call lecodestral#dismiss()
 
 let s:dir = expand('<sfile>:h:h')

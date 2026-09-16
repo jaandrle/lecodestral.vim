@@ -33,7 +33,7 @@ function s:notify(msg, highlight= 'Pmenu') abort
 	\)
 endfunction
 
-let s:enabled = s:get('enabled', 1)
+let s:enabled_global = s:get('enabled', 1)
 let s:ghost_lines = []
 let s:ghost_choices = []
 let s:ghost_idx = 0
@@ -48,6 +48,27 @@ let s:req_buf = 0
 let s:warned_key = 0
 let s:context_options = ['preview', 'full', 'line', 'word']
 let s:context = 'preview'
+
+function! s:disabled_reason() abort
+	if !s:enabled_global
+		return 'disabled globally (LeCodestralToggle)'
+	endif
+	if &buftype =~# '^\%(help\|prompt\|quickfix\|terminal\|nofile\)$'
+		return 'buftype=' . &buftype
+	endif
+	if exists('b:lecodestral_enabled')
+		return b:lecodestral_enabled ? '' : 'b:lecodestral_enabled = 0'
+	endif
+	let l:short = empty(&filetype) ? '.' : &filetype->split('\.', 1)[0]
+	let l:config = s:get('disabled_filetypes', [])
+	if l:config->index(&filetype) >= 0 || l:config->index(l:short) >= 0
+		return 'disabled filetype:' . &filetype
+	endif
+	return ''
+endfunction
+function! s:is_enabled() abort
+	return empty(s:disabled_reason())
+endfunction
 
 function! s:clear_ghost() abort
 	if s:ghost_active
@@ -242,7 +263,7 @@ endfunction
 
 function! s:trigger(...) abort
 	let s:timer_id = -1
-	if !s:enabled || mode() !~# '^[iRc]'
+	if !s:is_enabled() || mode() !~# '^[iRc]'
 		return
 	endif
 	call s:log('trigger fired')
@@ -332,7 +353,7 @@ function! s:trigger(...) abort
 endfunction
 
 function! lecodestral#on_change() abort
-	if !s:enabled
+	if !s:is_enabled()
 		return
 	endif
 	let l:result = s:consume_typed_prefix()
@@ -362,11 +383,18 @@ function! lecodestral#dismiss() abort
 endfunction
 
 function! lecodestral#toggle() abort
-	let s:enabled = !s:enabled
-	if !s:enabled
+	let s:enabled_global = !s:enabled_global
+	if !s:enabled_global
 		call s:clear_ghost()
 	endif
-	call s:notify(s:enabled ? 'Enabled' : 'Disabled')
+	call s:notify(s:enabled_global ? 'Enabled' : 'Disabled')
+endfunction
+function! lecodestral#toggle_buffer() abort
+	let b:lecodestral_enabled = !get(b:, 'lecodestral_enabled', 1)
+	if !b:lecodestral_enabled
+		call s:clear_ghost()
+	endif
+	call s:notify('Buffer ' . (b:lecodestral_enabled ? 'enabled' : 'disabled'))
 endfunction
 
 function! lecodestral#accept() abort

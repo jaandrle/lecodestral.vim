@@ -100,6 +100,7 @@ imap <S-Space> <Plug>(lecodestral-complete>
 ### Functions
 
 - `lecodestral#toggle()`: Toggle the plugin on/off. Same as `:LeCodestralToggle`.
+- `lecodestral#toggle_buffer()`: Toggle the plugin on/off for the current buffer.
 - `lecodestral#dismiss()`: Clear the currently displayed suggestion. Same as `:LeCodestralDismiss`.
 - `lecodestral#accept()`: Accept the currently displayed suggestion.
 - `lecodestral#complete()`: Trigger a new completion request.
@@ -112,12 +113,13 @@ imap <S-Space> <Plug>(lecodestral-complete>
 Set before the plugin loads (e.g. in your vimrc). Defaults shown:
 
 ```vim
-let g:lecodestral_enabled     = v:true " use v:false to disable
-let g:lecodestral_api_key_env = 'CODESTRAL_API_KEY'
-let g:lecodestral_max_lines   = 3 " shows/uses first N lines of suggestion — see <Plug>(lecodestral-expand)
-let g:lecodestral_choices     = 3 " number of suggestions to fetch (api can return less than requested)
-let g:lecodestral_debounce_ms = 150 " ms to wait after typing before requesting completions
-let g:lecodestral_temperature = 0.2 " lower = more deterministic (recommended between 0.0–0.7, see https://docs.mistral.ai/api/endpoint/fim)
+let g:lecodestral_enabled            = v:true " use v:false to disable
+let g:lecodestral_api_key_env        = 'CODESTRAL_API_KEY'
+let g:lecodestral_max_lines          = 3 " shows/uses first N lines of suggestion — see <Plug>(lecodestral-expand)
+let g:lecodestral_choices            = 3 " number of suggestions to fetch (api can return less than requested)
+let g:lecodestral_disabled_filetypes = [] " disable for these filetypes
+let g:lecodestral_debounce_ms        = 150 " ms to wait after typing before requesting completions
+let g:lecodestral_temperature        = 0.2 " lower = more deterministic (recommended between 0.0–0.7, see https://docs.mistral.ai/api/endpoint/fim)
 " Technical (see https://docs.mistral.ai/api/endpoint/fim)
 let g:lecodestral_endpoint    = 'https://api.mistral.ai/v1/fim/completions'
 let g:lecodestral_model       = 'codestral-latest'

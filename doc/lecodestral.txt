@@ -56,6 +56,9 @@ is visible, <Tab> behaves normally (real tab, or popup-menu navigation).
                                                               *:LeCodestralToggle*
 :LeCodestralToggle      Enable or disable suggestions for the session.
 
+                                                         *:LeCodestralToggleBuffer*
+:LeCodestralToggleBuffer      Enable or disable suggestions for the current buffer.
+
                                                              *:LeCodestralDismiss*
 :LeCodestralDismiss     Clear the currently displayed suggestion.
 
@@ -101,6 +104,9 @@ These functions can be called directly for advanced usage.
                                                     *lecodestral#toggle()*
 lecodestral#toggle()     Toggle the plugin on/off. Same as :LeCodestralToggle.
 
+                                                    *lecodestral#toggle_buffer()*
+lecodestral#toggle_buffer()     Toggle the plugin on/off for the current buffer. Same as :LeCodestralToggleBuffer.
+
                                                     *lecodestral#dismiss()*
 lecodestral#dismiss()    Clear the currently displayed suggestion. Same as
                        :LeCodestralDismiss.
@@ -133,6 +139,10 @@ Set these before the plugin loads (e.g. in your vimrc).
                                                           *g:lecodestral_enabled*
 g:lecodestral_enabled        (default v:true)
         Start with suggestions enabled.
+
+                                                *g:lecodestral_disabled_filetypes*
+g:lecodestral_disabled_filetypes (default [])
+        List of filetypes for which suggestions are disabled.
 
                                                             *g:lecodestral_model*
 g:lecodestral_model          (default "codestral-latest")
