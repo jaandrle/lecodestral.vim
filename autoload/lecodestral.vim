@@ -293,6 +293,10 @@ endfunction
 
 function! s:trigger(...) abort
 	let s:timer_id = -1
+	if &encoding !=# 'latin1' && &encoding !=# 'utf-8'
+		call s:log('bail: unsupported encoding ' . &encoding)
+		return
+	endif
 	if !s:is_enabled() || mode() !~# '^[iRc]'
 		return
 	endif
