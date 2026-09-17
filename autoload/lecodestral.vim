@@ -40,6 +40,9 @@ let s:ghost_idx = 0
 let s:ghost_active = 0
 let s:timer_id = -1
 let s:cur_job = v:null
+let s:cur_req_key = ''
+let s:last_req_key = ''
+let s:last_choices = []
 let s:job_chunks = []
 let s:gen = 0
 let s:req_lnum = 0
@@ -315,6 +318,8 @@ function! s:finish(gen, ch) abort
 	if empty(s:ghost_choices)
 		return
 	endif
+	let s:last_req_key = s:cur_req_key
+	let s:last_choices = copy(s:ghost_choices)
 	call lecodestral#cycle(0)
 endfunction
 
@@ -329,17 +334,14 @@ function! s:trigger(...) abort
 	endif
 	call s:log('trigger fired')
 	let l:env = s:get('api_key_env', 'CODESTRAL_API_KEY')
-	let l:key = getenv(l:env)
-	if type(l:key) != v:t_string || l:key ==# ''
+	let l:bearer = getenv(l:env)
+	if type(l:bearer) != v:t_string || l:bearer ==# ''
 		call s:log('bail: env ' . l:env . ' not set in Vim')
 		if !s:warned_key
 			let s:warned_key = 1
 			call s:notify('Environment variable `' . l:env . '` not set', 'WarningMsg')
 		endif
 		return
-	endif
-	if type(s:cur_job) == v:t_job && job_status(s:cur_job) ==# 'run'
-		call job_stop(s:cur_job)
 	endif
 
 	let l:lnum = line('.')
@@ -395,13 +397,35 @@ function! s:trigger(...) abort
 		let l:payload.stop = l:stop
 	endif
 	let l:body = json_encode(l:payload)
+	" De-duplicate requests: identical payload for the same buffer must not be
+	" issued twice. Reuse an in-flight request, or re-render a completed one.
+	let l:key = bufnr('%') . "\n" . l:body
+	if type(s:cur_job) == v:t_job && job_status(s:cur_job) ==# 'run'
+		if s:cur_req_key ==# l:key
+			call s:log('dedup: in-flight match')
+			return
+		endif
+	elseif s:last_req_key ==# l:key && !empty(s:last_choices)
+		call s:log('dedup: cached match')
+		let s:req_lnum = l:lnum
+		let s:req_col = l:c
+		let s:req_buf = bufnr('%')
+		let s:ghost_choices = copy(s:last_choices)
+		let s:ghost_idx = 0
+		call lecodestral#cycle(0)
+		return
+	endif
 
 	let l:argv = ['curl', '-s', '-X', 'POST', s:get('endpoint', s:default_endpoint),
 				\ '-H', 'Content-Type: application/json',
-				\ '-H', 'Authorization: Bearer ' . l:key,
+				\ '-H', 'Authorization: Bearer ' . l:bearer,
 				\ '-d', l:body]
 
 	call s:log('POST body=' . strlen(l:body) . 'B prefix=' . strlen(l:prefix) . ' suffix=' . strlen(l:suffix))
+	let s:cur_req_key = l:key
+	if type(s:cur_job) == v:t_job && job_status(s:cur_job) ==# 'run'
+		call job_stop(s:cur_job)
+	endif
 	let s:gen += 1
 	let l:gen = s:gen
 	let s:job_chunks = []

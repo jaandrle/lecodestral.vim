@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### ✨ Added
 
+- **Request de-duplication** — identical requests (same buffer/content at the cursor) are no longer re-issued: an in-flight request with an identical payload is kept instead of being killed and re-fired, and a completed request's result is re-rendered from cache instead of hitting the network again (helps avoid Codestral rate limits on undo/backspace and repeated triggers).
 - **Buffer-level toggle** — enable/disable suggestions per buffer with `:LeCodestralToggleBuffer` / `lecodestral#toggle_buffer()` (`b:lecodestral_enabled`).
 - **Automatic disabling for special buffers** — suggestions are skipped in `help`, `prompt`, `quickfix`, `terminal` and `nofile` buffers.
 - **`g:lecodestral_disabled_filetypes`** — disable suggestions for specific filetypes.
