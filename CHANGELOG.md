@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 - **`g:lecodestral_disabled_filetypes`** — disable suggestions for specific filetypes.
 - **Statusline support** — add `%{lecodestral#statusline()}` to `&statusline` to show the plugin state (`OFF`, ` ON`, ` * `, `N/M`, ` 0 `). The statusline auto-refreshes via `redrawstatus()` whenever the state changes.
 - **`:LeCodestralStatus` / `lecodestral#status()`** — show why suggestions are disabled (or that they're enabled) via a popup.
+- Improves error reporting (network errors, rate limits, etc.)
 
 ### 🔧 Changed
 

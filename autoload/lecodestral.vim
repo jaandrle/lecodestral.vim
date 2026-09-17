@@ -268,6 +268,15 @@ function! s:strip_suffix_overlap(lines) abort
 	return a:lines
 endfunction
 
+let s:last_error = ''
+function! s:report_error(msg) abort
+	if a:msg ==# s:last_error
+		return
+	endif
+	let s:last_error = a:msg
+	call s:notify(a:msg, 'WarningMsg')
+endfunction
+
 function! s:finish(gen, ch) abort
 	call s:redraw_statusline()
 	let s:ghost_choices = []
@@ -285,21 +294,33 @@ function! s:finish(gen, ch) abort
 		call s:log('bail: not insert mode (' . mode() . ')')
 		return
 	endif
-	let l:raw = join(s:job_chunks, '')
+	let l:raw_all = join(s:job_chunks, '')
+	let l:nl = strridx(l:raw_all, "\n")
+	let l:http_code = l:nl >= 0 ? strpart(l:raw_all, l:nl + 1) : ''
+	if l:http_code !~# '^2'
+		call s:log('bail: request failed ' . l:http_code)
+		call s:report_error('LeCodestral: request failed (HTTP ' . (empty(l:http_code) ? '?' : l:http_code) . ')')
+		return
+	endif
+	let l:raw = l:nl >= 0 ? strpart(l:raw_all, 0, l:nl) : l:raw_all
 	if l:raw ==# ''
 		call s:log('bail: empty response')
+		call s:report_error('LeCodestral: empty response (network/curl failure?)')
 		return
 	endif
 	try
 		let l:data = json_decode(l:raw)
 	catch
 		call s:log('bail: json_decode failed: ' . v:exception . ' raw=' . l:raw[0:300])
+		call s:report_error('LeCodestral: corrupted response')
 		return
 	endtry
 	if type(l:data) != v:t_dict || !has_key(l:data, 'choices') || empty(l:data.choices)
 		call s:log('bail: no choices. raw=' . l:raw[0:300])
+		call s:report_error('LeCodestral: corrupted response')
 		return
 	endif
+	let s:last_error = ''
 	let l:texts = []
 	for l:choice in l:data.choices
 		let l:text = ''
@@ -416,7 +437,7 @@ function! s:trigger(...) abort
 		return
 	endif
 
-	let l:argv = ['curl', '-s', '-X', 'POST', s:get('endpoint', s:default_endpoint),
+	let l:argv = ['curl', '-s', '-w', '\n%{http_code}', '-X', 'POST', s:get('endpoint', s:default_endpoint),
 				\ '-H', 'Content-Type: application/json',
 				\ '-H', 'Authorization: Bearer ' . l:bearer,
 				\ '-d', l:body]
