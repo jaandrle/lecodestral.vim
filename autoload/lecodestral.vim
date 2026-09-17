@@ -238,6 +238,33 @@ function! s:on_err(gen, ch, msg) abort
 	call s:log('ERR ' . a:msg)
 endfunction
 
+" Strip from the last suggestion line the longest suffix that is also a
+" prefix of the text after the cursor on the current line. FIM models
+" sometimes echo part of the suffix; this prevents duplicated text on
+" accept and avoids a doubled ghost display.
+function! s:strip_suffix_overlap(lines) abort
+	if empty(a:lines)
+		return a:lines
+	endif
+	let l:after = strpart(getline('.'), col('.') - 1)
+	if l:after ==# ''
+		return a:lines
+	endif
+	let l:last = a:lines[-1]
+	if l:last ==# ''
+		return a:lines
+	endif
+	let l:max = min([strlen(l:last), strlen(l:after)])
+	for l:len in range(l:max, 1, -1)
+		if strpart(l:last, strlen(l:last) - l:len) ==# strpart(l:after, 0, l:len)
+			let l:result = copy(a:lines)
+			let l:result[-1] = strpart(l:last, 0, strlen(l:last) - l:len)
+			return l:result
+		endif
+	endfor
+	return a:lines
+endfunction
+
 function! s:finish(gen, ch) abort
 	call s:redraw_statusline()
 	let s:ghost_choices = []
@@ -282,7 +309,7 @@ function! s:finish(gen, ch) abort
 			continue
 		endif
 		call add(l:texts, l:text)
-		let l:lines = split(l:text, "\n", 1)
+		let l:lines = s:strip_suffix_overlap(split(l:text, "\n", 1))
 		call add(s:ghost_choices, l:lines)
 	endfor
 	if empty(s:ghost_choices)
